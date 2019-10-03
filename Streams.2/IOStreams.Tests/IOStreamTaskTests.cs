@@ -101,9 +101,9 @@ namespace IOStreams.Tests
         public void DecompressStream_Should_Extract_Data_Correctly()
         {
             var testData = new Dictionary<string, DecompressionMethods>
-                { { ResourseFileName+".deflate", DecompressionMethods.Deflate },
+                {
                     { ResourseFileName,            DecompressionMethods.None    },
-                   
+                    { ResourseFileName+".deflate", DecompressionMethods.Deflate },
                     { ResourseFileName+".gzip",    DecompressionMethods.GZip    }
                 };
 

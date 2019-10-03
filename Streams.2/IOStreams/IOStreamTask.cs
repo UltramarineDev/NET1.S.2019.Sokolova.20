@@ -99,40 +99,57 @@ namespace IOStreams
         /// <returns>output stream</returns>
         public static Stream DecompressStream(string fileName, DecompressionMethods method)
         {
+            string newFileName = "";
             // TODO : Implement DecompressStream method
             using (FileStream originalFileStream = File.OpenRead(fileName))
             {
                 var info = new FileInfo(fileName);
-                string currentFileName = info.FullName;
-                string newFileName = currentFileName.Remove(currentFileName.Length - info.Extension.Length);
+                string currentFileName = info.Name;
+                if (method == DecompressionMethods.None)
+                    newFileName = currentFileName;
+                else
+                    newFileName = currentFileName.Remove(currentFileName.Length - info.Extension.Length);
 
-                FileStream decompressedFileStream = File.Create(newFileName);
-
-                switch (method)
+                var directory = Path.GetDirectoryName(@"Decompress\Planet.xlsx");
+                if (!Directory.Exists(directory))
                 {
-                    case DecompressionMethods.Deflate:
-                        using (DeflateStream decompressionStream = new DeflateStream(originalFileStream, CompressionMode.Decompress, false))
-                        {
-                            decompressionStream.CopyTo(decompressedFileStream);
-                            break;
-                        }
-
-                    case DecompressionMethods.None:
-                        break;
-
-                    case DecompressionMethods.GZip:
-                        using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress, false))
-                        {
-                            decompressionStream.CopyTo(decompressedFileStream);
-                            break;
-                        }
-                    default:
-                        break;
+                    Directory.CreateDirectory(directory);
                 }
 
-                return decompressedFileStream;
+                string pathToCreate = Path.Combine(directory, newFileName);
+                using (FileStream decompressedFileStream = File.Create(pathToCreate))
+                {
+                    switch (method)
+                    {
+                        case DecompressionMethods.Deflate:
+                            using (DeflateStream decompressionStream = new DeflateStream(originalFileStream, CompressionMode.Decompress, false))
+                            {
+                                decompressionStream.CopyTo(decompressedFileStream);
+                                break;
+                            }
+
+                        case DecompressionMethods.None:
+                            {
+                                originalFileStream.CopyTo(decompressedFileStream);
+                                break;
+                            }
+                           
+
+                        case DecompressionMethods.GZip:
+                            using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress, false))
+                            {
+                                decompressionStream.CopyTo(decompressedFileStream);
+                                break;
+                            }
+                        default:
+                            break;
+                    }
+                }
+
+                return File.OpenRead(pathToCreate);
             }
         }
+
 
         /// <summary>
         /// Reads file content encoded with non Unicode encoding
